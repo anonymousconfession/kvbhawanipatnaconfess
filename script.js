@@ -1,21 +1,8 @@
-// Dark Mode Toggle
-const darkModeToggle = document.getElementById('darkModeToggle');
-const body = document.body;
+// Firebase setup
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-darkModeToggle.addEventListener('click', () => {
-  body.dataset.theme = body.dataset.theme === 'dark' ? 'light' : 'dark';
-  darkModeToggle.textContent = body.dataset.theme === 'dark' ? '☀️' : '🌙';
-  localStorage.setItem('theme', body.dataset.theme);
-});
-
-// Load saved theme
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-  body.dataset.theme = savedTheme;
-  darkModeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-}
-
-// Firebase configuration and functionality (same as before)
+// Your Firebase configuration (replace with your actual config)
 const firebaseConfig = {
     apiKey: "AIzaSyAisU7STb4UAJmcpuFtvp520OrX0of-THI",
     authDomain: "anonymousconfession-19707.firebaseapp.com",
@@ -25,67 +12,95 @@ const firebaseConfig = {
     appId: "1:513711142017:web:a54387faff58ba03644980",
     measurementId: "G-B7YXCGCB8Q"
   };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-auth.signInAnonymously().catch((error) => {
-  console.error("Error signing in anonymously:", error);
-});
+// Submit Confession
+async function submitConfession() {
+    let confessionText = document.getElementById("confessionInput").value.trim();
+    if (confessionText === "") {
+        alert("Please enter a confession before submitting.");
+        return;
+    }
 
-const confessionForm = document.getElementById('confessionForm');
-confessionForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const confessionText = document.getElementById('confessionText').value;
-  db.collection('confessions').add({
-    text: confessionText,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    likes: 0,
-    comments: []
-  }).then(() => {
-    confessionForm.reset();
-  }).catch((error) => {
-    console.error("Error adding confession:", error);
-  });
-});
+    try {
+        await addDoc(collection(db, "confessions"), {
+            text: confessionText,
+            likes: 0,
+            dislikes: 0,
+            comments: []
+        });
 
-const confessionsDiv = document.getElementById('confessions');
-db.collection('confessions').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
-  confessionsDiv.innerHTML = '';
-  snapshot.forEach((doc) => {
-    const confession = doc.data();
-    const confessionElement = document.createElement('div');
-    confessionElement.classList.add('confession');
-    confessionElement.innerHTML = `
-      <p>${confession.text}</p>
-      <div class="actions">
-        <button class="like" onclick="likeConfession('${doc.id}', ${confession.likes})">Like (${confession.likes})</button>
-        <button class="comment" onclick="commentOnConfession('${doc.id}')">Comment</button>
-      </div>
-      <div id="comments-${doc.id}"></div>
-    `;
-    confessionsDiv.appendChild(confessionElement);
+        document.getElementById("confessionInput").value = "";
+        loadConfessions();
+    } catch (error) {
+        console.error("Error adding confession:", error);
+    }
+}
 
-    const commentsDiv = document.getElementById(`comments-${doc.id}`);
-    confession.comments.forEach((comment) => {
-      const commentElement = document.createElement('p');
-      commentElement.textContent = comment;
-      commentsDiv.appendChild(commentElement);
+// Load Confessions
+async function loadConfessions() {
+    let confessionList = document.getElementById("confessionList");
+    confessionList.innerHTML = "";
+
+    const querySnapshot = await getDocs(collection(db, "confessions"));
+    querySnapshot.forEach((doc) => {
+        let data = doc.data();
+        let div = document.createElement("div");
+        div.className = "confession-item";
+        div.innerHTML = `
+            <p>📝 ${data.text}</p>
+            <div class="buttons">
+                <button class="like-btn" onclick="likeConfession('${doc.id}', ${data.likes})">👍 ${data.likes}</button>
+                <button class="dislike-btn" onclick="dislikeConfession('${doc.id}', ${data.dislikes})">👎 ${data.dislikes}</button>
+            </div>
+            <div class="comment-section">
+                <input type="text" class="comment-input" id="comment-${doc.id}" placeholder="Add a comment...">
+                <button onclick="addComment('${doc.id}')">💬 Comment</button>
+                <div class="comment-list" id="commentList-${doc.id}">
+                    ${data.comments.map(comment => `<p>🗨️ ${comment}</p>`).join("")}
+                </div>
+            </div>
+        `;
+        confessionList.appendChild(div);
     });
-  });
+}
+
+// Like & Dislike
+async function likeConfession(id, likes) {
+    const confessionRef = doc(db, "confessions", id);
+    await updateDoc(confessionRef, { likes: likes + 1 });
+    loadConfessions();
+}
+
+async function dislikeConfession(id, dislikes) {
+    const confessionRef = doc(db, "confessions", id);
+    await updateDoc(confessionRef, { dislikes: dislikes + 1 });
+    loadConfessions();
+}
+
+// Add Comment
+async function addComment(id) {
+    let commentInput = document.getElementById(`comment-${id}`).value.trim();
+    if (!commentInput) return;
+
+    const confessionRef = doc(db, "confessions", id);
+    const data = (await getDoc(confessionRef)).data();
+    data.comments.push(commentInput);
+
+    await updateDoc(confessionRef, { comments: data.comments });
+    loadConfessions();
+}
+
+// Dark Mode Toggle
+document.getElementById("darkModeToggle").addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
 });
 
-window.likeConfession = (id, currentLikes) => {
-  db.collection('confessions').doc(id).update({
-    likes: currentLikes + 1
-  });
-};
-
-window.commentOnConfession = (id) => {
-  const comment = prompt("Enter your comment:");
-  if (comment) {
-    db.collection('confessions').doc(id).update({
-      comments: firebase.firestore.FieldValue.arrayUnion(comment)
-    });
-  }
-};
+// Load Dark Mode
+document.addEventListener("DOMContentLoaded", () => {
+    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+    loadConfessions();
+});

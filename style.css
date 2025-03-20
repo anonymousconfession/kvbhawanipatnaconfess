@@ -1,127 +1,133 @@
-/* Light Mode (Default) */
-:root {
-    --background-color: #ffffff;
-    --text-color: #333333;
-    --primary-color: #007bff;
-    --secondary-color: #6c757d;
-    --border-color: #ddd;
-    --card-background: #f9f9f9;
-    --button-hover: #0056b3;
-  }
-  
-  /* Dark Mode */
-  [data-theme="dark"] {
-    --background-color: #121212;
-    --text-color: #ffffff;
-    --primary-color: #1e90ff;
-    --secondary-color: #a9a9a9;
-    --border-color: #333;
-    --card-background: #1e1e1e;
-    --button-hover: #007bff;
-  }
-  
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
+/* Default Light Mode */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     margin: 0;
+    padding: 0;
+    text-align: center;
+    transition: background 0.3s, color 0.3s;
+}
+
+.container {
+    width: 50%;
+    margin: auto;
+    background: white;
     padding: 20px;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  
-  .container {
-    max-width: 600px;
-    margin: 0 auto;
-    background: var(--card-background);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    transition: background 0.3s, color 0.3s;
+}
+
+h1 {
+    color: #333;
+}
+
+.confession-box {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-  }
-  
-  h1 {
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  #darkModeToggle {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: var(--text-color);
-  }
-  
-  #confessionForm textarea {
+}
+
+textarea {
     width: 100%;
     height: 100px;
     padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--background-color);
-    color: var(--text-color);
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
     resize: none;
-  }
-  
-  #confessionForm button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: var(--primary-color);
-    color: #fff;
+}
+
+button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  #confessionForm button:hover {
-    background-color: var(--button-hover);
-  }
-  
-  .confession {
-    background: var(--card-background);
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-  }
-  
-  .confession p {
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  .confession .actions {
     margin-top: 10px;
-  }
-  
-  .confession .actions button {
-    margin-right: 10px;
-    padding: 5px 10px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+.confession-item {
+    background: #f8f8f8;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+/* Like, Dislike, and Comments */
+.buttons {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.like-btn, .dislike-btn {
+    background: transparent;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  .confession .actions button.like {
-    background-color: var(--primary-color);
-    color: #fff;
-  }
-  
-  .confession .actions button.comment {
-    background-color: var(--secondary-color);
-    color: #fff;
-  }
-  
-  .confession .actions button:hover {
-    opacity: 0.9;
-  }
+    font-size: 1.2em;
+    margin-right: 10px;
+}
+
+.comment-section {
+    margin-top: 10px;
+}
+
+.comment-input {
+    width: 80%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.comment-list {
+    margin-top: 10px;
+    padding-left: 20px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Dark Mode */
+.dark-mode {
+    background-color: #121212;
+    color: white;
+}
+
+.dark-mode .container {
+    background: #1e1e1e;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode textarea {
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+.dark-mode .confession-item {
+    background: #333;
+    color: white;
+}
+
+#darkModeToggle {
+    padding: 5px 15px;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#darkModeToggle:hover {
+    background: #222;
+}
